@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSFS 2024 Keybinds</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+        }
+        .keyboard-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-width: 900px;
+            margin: 2rem auto;
+            background: #232946;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+        .keyboard-row {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+        }
+        .key {
+            background-color: #1e1e2d;
+            border: 1px solid #3e405d;
+            border-radius: 0.5rem;
+            color: #c9d1d9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.5rem;
+            min-width: 40px;
+            height: 40px;
+            cursor: pointer;
+            transition: all 0.1s ease-in-out;
+            position: relative;
+        }
+        .key-large {
+            flex-grow: 1;
+        }
+        .key-space {
+            min-width: 300px;
+        }
+        /* Style for keys that are currently pressed (physical keyboard) */
+        .key-pressed {
+            transform: scale(0.95);
+            background-color: #fca5a5; /* Tailwind red-500 */
+            color: #1a1a2e;
+            box-shadow: 0 0 10px rgba(252, 165, 165, 0.7);
+        }
+        /* Style for keys that are selected (via click) */
+        .key-selected {
+            background-color: #60a5fa; /* Tailwind blue-400 */
+            color: #1a1a2e;
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.7);
+            transform: scale(0.95);
+        }
+        #keybind-display {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: #2e304f;
+            border-radius: 0.75rem;
+            text-align: center;
+            font-size: 1.125rem;
+            font-weight: 600;
+            min-height: 4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: center;
+            justify-content: center;
+        }
+        #keybind-display ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: left;
+            max-width: 100%;
+            width: 100%;
+        }
+        #keybind-display li {
+            background-color: #3e405d;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.25rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .create-button {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            cursor: pointer;
+            text-align: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            transition: background-color 0.2s;
+        }
+        .create-button:hover {
+            background-color: #2d3748;
+        }
+        .remove-button {
+            color: #ef4444; /* Tailwind red-500 */
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.25rem;
+            line-height: 1;
+            padding: 0 0.25rem;
+            transition: color 0.2s;
+        }
+        .remove-button:hover {
+            color: #dc2626; /* Tailwind red-700 */
+        }
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: #2d3748;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #4a5568;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 0.5rem;
+            color: #e2e8f0;
+            text-align: left;
+            position: relative;
+        }
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            line-height: 1;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #e2e8f0;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .modal-input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            background-color: #3e405d;
+            border: 1px solid #4a5568;
+            border-radius: 0.25rem;
+            color: #e2e8f0;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .modal-save-button {
+            background-color: #84cc16;
+            color: #1a1a2e;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .modal-save-button:hover {
+            background-color: #65a30d;
+        }
+        .modal-record-button {
+            background-color: #f59e0b; /* Tailwind amber-500 */
+            color: #1a1a2e;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .modal-record-button:hover {
+            background-color: #d97706; /* Tailwind amber-700 */
+        }
+        .modal-text-input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            background-color: #3e405d;
+            border: 1px solid #4a5568;
+            border-radius: 0.25rem;
+            color: #e2e8f0;
+        }
+        .disabled-button {
+            background-color: #4a5568;
+            color: #a0aec0;
+            cursor: not-allowed;
+        }
+        .disabled-button:hover {
+            background-color: #4a5568;
+        }
+    </style>
+</head>
+<body class="bg-[#1a1a2e]">
+    <div class="keyboard-container">
+        <!-- Top row: Function Keys & Special Keys -->
+        <div class="keyboard-row">
+            <div class="key" id="reset-button" data-key="ResetDefaults">Reset to Defaults</div>
+            <div class="key" data-key="Escape">Esc</div>
+            <div class="key" data-key="F1">F1</div>
+            <div class="key" data-key="F2">F2</div>
+            <div class="key" data-key="F3">F3</div>
+            <div class="key" data-key="F4">F4</div>
+            <div class="key" data-key="F5">F5</div>
+            <div class="key" data-key="F6">F6</div>
+            <div class="key" data-key="F7">F7</div>
+            <div class="key" data-key="F8">F8</div>
+            <div class="key" data-key="F9">F9</div>
+            <div class="key" data-key="F10">F10</div>
+            <div class="key" data-key="F11">F11</div>
+            <div class="key" data-key="F12">F12</div>
+            <div class="key">PrtSc</div>
+            <div class="key" data-key="Delete">Del</div>
+        </div>
+
+        <!-- Number row -->
+        <div class="keyboard-row">
+            <div class="key" data-key="Backquote">`</div>
+            <div class="key" data-key="Digit1">1</div>
+            <div class="key" data-key="Digit2">2</div>
+            <div class="key" data-key="Digit3">3</div>
+            <div class="key" data-key="Digit4">4</div>
+            <div class="key" data-key="Digit5">5</div>
+            <div class="key" data-key="Digit6">6</div>
+            <div class="key" data-key="Digit7">7</div>
+            <div class="key" data-key="Digit8">8</div>
+            <div class="key" data-key="Digit9">9</div>
+            <div class="key" data-key="Digit0">0</div>
+            <div class="key" data-key="Minus">-</div>
+            <div class="key" data-key="Equal">=</div>
+            <div class="key key-large" data-key="Backspace">Backspace</div>
+        </div>
+
+        <!-- QWERTY row -->
+        <div class="keyboard-row">
+            <div class="key key-large" data-key="Tab">Tab</div>
+            <div class="key" data-key="KeyQ">Q</div>
+            <div class="key" data-key="KeyW">W</div>
+            <div class="key" data-key="KeyE">E</div>
+            <div class="key" data-key="KeyR">R</div>
+            <div class="key" data-key="KeyT">T</div>
+            <div class="key" data-key="KeyY">Y</div>
+            <div class="key" data-key="KeyU">U</div>
+            <div class="key" data-key="KeyI">I</div>
+            <div class="key" data-key="KeyO">O</div>
+            <div class="key" data-key="KeyP">P</div>
+            <div class="key" data-key="BracketLeft">[</div>
+            <div class="key" data-key="BracketRight">]</div>
+            <div class="key key-large" data-key="Backslash">\</div>
+        </div>
+
+        <!-- ASDF row -->
+        <div class="keyboard-row">
+            <div class="key key-large" data-key="CapsLock">Caps</div>
+            <div class="key" data-key="KeyA">A</div>
+            <div class="key" data-key="KeyS">S</div>
+            <div class="key" data-key="KeyD">D</div>
+            <div class="key" data-key="KeyF">F</div>
+            <div class="key" data-key="KeyG">G</div>
+            <div class="key" data-key="KeyH">H</div>
+            <div class="key" data-key="KeyJ">J</div>
+            <div class="key" data-key="KeyK">K</div>
+            <div class="key" data-key="KeyL">L</div>
+            <div class="key" data-key="Semicolon">;</div>
+            <div class="key" data-key="Quote">'</div>
+            <div class="key key-large" data-key="Enter">Enter</div>
+        </div>
+
+        <!-- ZXC row -->
+        <div class="keyboard-row">
+            <div class="key key-large" data-key="ShiftLeft">Shift</div>
+            <div class="key" data-key="KeyZ">Z</div>
+            <div class="key" data-key="KeyX">X</div>
+            <div class="key" data-key="KeyC">C</div>
+            <div class="key" data-key="KeyV">V</div>
+            <div class="key" data-key="KeyB">B</div>
+            <div class="key" data-key="KeyN">N</div>
+            <div class="key" data-key="KeyM">M</div>
+            <div class="key" data-key="Comma">,</div>
+            <div class="key" data-key="Period">.</div>
+            <div class="key" data-key="Slash">/</div>
+            <div class="key key-large" data-key="ShiftRight">Shift</div>
+        </div>
+
+        <!-- Bottom row -->
+        <div class="keyboard-row">
+            <div class="key key-large" data-key="ControlLeft">Ctrl</div>
+            <div class="key" data-key="MetaLeft">Win</div>
+            <div class="key key-large" data-key="AltLeft">Alt</div>
+            <div class="key key-space" data-key="Space">Space</div>
+            <div class="key key-large" data-key="AltRight">Alt</div>
+            <div class="key" data-key="MetaRight">Win</div>
+            <div class="key key-large" data-key="ControlRight">Ctrl</div>
+            <div class="key" data-key="ArrowUp">↑</div>
+            <div class="key" data-key="ArrowLeft">←</div>
+            <div class="key" data-key="ArrowDown">↓</div>
+            <div class="key" data-key="ArrowRight">→</div>
+        </div>
+
+        <!-- Keybind display area -->
+        <div id="keybind-display" class="bg-[#2e304f] text-green-300">
+            <div class="text-white text-lg font-bold mb-2">Instructions:</div>
+            <ul class="text-sm">
+                <li>Press keys on your physical keyboard.</li>
+                <li>Click keys on the virtual keyboard.</li>
+                <li>Selected keys will highlight and show all matching commands below.</li>
+            </ul>
+            <button id="create-keybind-btn" class="create-button">Create Your Own Keybind...</button>
+        </div>
+
+        <!-- Modal for create your own -->
+        <div id="createModal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-button" id="closeModalBtn">&times;</span>
+                <h3 class="text-lg font-bold mb-4">Create Your Own Keybind</h3>
+                
+                <label for="keyAction" class="block mb-2">Action Description:</label>
+                <input type="text" id="keyAction" class="modal-text-input" placeholder="e.g., Toggle cockpit lights">
+
+                <label for="keyCombination" class="block mt-4 mb-2">Key Combination:</label>
+                <div id="keyCombinationDisplay" class="modal-input mb-4" data-keybind-combo="">
+                    Press the "Record Keybind" button below to start...
+                </div>
+                <div class="flex gap-2">
+                    <button id="recordKeybindBtn" class="modal-record-button">Record Keybind</button>
+                    <button id="clearRecordingBtn" class="create-button disabled-button">Clear</button>
+                    <button id="stopRecordingBtn" class="create-button disabled-button">Stop Recording</button>
+                </div>
+                
+                <div class="modal-buttons">
+                    <button id="saveKeybindBtn" class="modal-save-button">Save Keybind</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const defaultKeybindsData = [
+                { id: 'uuid-1', keys: ['Escape'], action: 'Pause' },
+                { id: 'uuid-2', keys: ['F1'], action: 'Mixture Cut / Throttle Cut' },
+                { id: 'uuid-3', keys: ['F2'], action: 'Decrease Throttle' },
+                { id: 'uuid-4', keys: ['F3'], action: 'Increase Throttle' },
+                { id: 'uuid-5', keys: ['F4'], action: 'Set Throttle Max' },
+                { id: 'uuid-6', keys: ['F5'], action: 'Retract Flaps' },
+                { id: 'uuid-7', keys: ['F6'], action: 'Decrease Flaps' },
+                { id: 'uuid-8', keys: ['F7'], action: 'Increase Flaps' },
+                { id: 'uuid-9', keys: ['F8'], action: 'Extend Flaps' },
+                { id: 'uuid-10', keys: ['F9'], action: 'Toggle IFR Cockpit Mode' },
+                { id: 'uuid-11', keys: ['F10'], action: 'Toggle VFR Cockpit Mode' },
+                { id: 'uuid-12', keys: ['F11'], action: 'Toggle Landing Cockpit Mode' },
+                { id: 'uuid-13', keys: ['F12'], action: 'Toggle Fixed Camera' },
+                { id: 'uuid-14', keys: ['Delete'], action: 'Clear Search' },
+                { id: 'uuid-15', keys: ['Backquote'], action: 'Display/Hide ATC Menu' },
+                { id: 'uuid-16', keys: ['Backspace'], action: 'Toggle View Mode' },
+                { id: 'uuid-17', keys: ['KeyQ'], action: 'Rudder Left (Yaw Left)' },
+                { id: 'uuid-18', keys: ['KeyW'], action: 'Elevator Down (Pitch Down)' },
+                { id: 'uuid-19', keys: ['KeyE'], action: 'Rudder Right (Yaw Right)' },
+                { id: 'uuid-20', keys: ['KeyR'], action: 'Toggle Slew Mode' },
+                { id: 'uuid-21', keys: ['KeyT'], action: 'Set Custom Smartcam Target' },
+                { id: 'uuid-22', keys: ['KeyY'], action: 'Toggle Slew Mode' },
+                { id: 'uuid-23', keys: ['KeyI'], action: 'External View Look Down' },
+                { id: 'uuid-24', keys: ['KeyO'], action: 'Toggle Strobes' },
+                { id: 'uuid-25', keys: ['KeyP'], action: 'Toggle Pitot Heat' },
+                { id: 'uuid-26', keys: ['KeyA'], action: 'Aileron Left (Roll Left)' },
+                { id: 'uuid-27', keys: ['KeyS'], action: 'Elevator Up (Pitch Up)' },
+                { id: 'uuid-28', keys: ['KeyD'], action: 'Aileron Right (Roll Right)' },
+                { id: 'uuid-29', keys: ['KeyF'], action: 'Reset Cockpit View / Fixed Camera' },
+                { id: 'uuid-30', keys: ['KeyG'], action: 'Toggle Landing Gear' },
+                { id: 'uuid-31', keys: ['KeyH'], action: 'Toggle Anti-Ice' },
+                { id: 'uuid-32', keys: ['KeyJ'], action: 'External View Look Right' },
+                { id: 'uuid-33', keys: ['KeyK'], action: 'External View Look Up' },
+                { id: 'uuid-34', keys: ['KeyL'], action: 'Toggle Lights' },
+                { id: 'uuid-35', keys: ['KeyZ'], action: 'Toggle Autopilot Master' },
+                { id: 'uuid-36', keys: ['KeyX'], action: 'Toggle Avionics Master' },
+                { id: 'uuid-37', keys: ['KeyC'], action: 'Com Radio' },
+                { id: 'uuid-38', keys: ['KeyV'], action: 'Capture Screenshot' },
+                { id: 'uuid-39', keys: ['KeyB'], action: 'Set Altimeter' },
+                { id: 'uuid-40', keys: ['KeyN'], action: 'Toggle Nav Lights' },
+                { id: 'uuid-41', keys: ['KeyM'], action: 'Toggle GPS' },
+                { id: 'uuid-42', keys: ['Slash'], action: 'Toggle Spoilers' },
+                { id: 'uuid-43', keys: ['Comma'], action: 'Decrease Selection' },
+                { id: 'uuid-44', keys: ['Period'], action: 'Apply/Release Brakes' },
+                { id: 'uuid-45', keys: ['Space'], action: 'Apply/Release Brakes' },
+                { id: 'uuid-46', keys: ['ArrowUp'], action: 'Translate Cockpit View Forward' },
+                { id: 'uuid-47', keys: ['ArrowLeft'], action: 'Translate Cockpit View Left' },
+                { id: 'uuid-48', keys: ['ArrowDown'], action: 'Translate Cockpit View Backward' },
+                { id: 'uuid-49', keys: ['ArrowRight'], action: 'Translate Cockpit View Right' },
+                { id: 'uuid-50', keys: ['ShiftLeft', 'KeyA'], action: 'Previous Instrument View' },
+                { id: 'uuid-51', keys: ['ShiftLeft', 'KeyR'], action: 'Previous SmartCam Target' },
+                { id: 'uuid-52', keys: ['ShiftLeft', 'KeyC'], action: 'Display Checklist' },
+                { id: 'uuid-53', keys: ['ShiftLeft', 'KeyH'], action: 'External QuickView Left' },
+                { id: 'uuid-54', keys: ['ShiftLeft', 'KeyJ'], action: 'External View Look Right' },
+                { id: 'uuid-55', keys: ['ShiftLeft', 'KeyK'], action: 'External View Look Up' },
+                { id: 'uuid-56', keys: ['ShiftLeft', 'KeyL'], action: 'Toggle Panel Lights' },
+                { id: 'uuid-57', keys: ['ShiftLeft', 'KeyE'], action: 'Increase Cockpit View Height' },
+                { id: 'uuid-58', keys: ['ShiftLeft', 'KeyQ'], action: 'Decrease Cockpit View Height' },
+                { id: 'uuid-59', keys: ['ControlLeft', 'KeyA'], action: 'Toggle Autopilot Approach Hold' },
+                { id: 'uuid-60', keys: ['ControlLeft', 'KeyF'], action: 'Toggle Flight Director' },
+                { id: 'uuid-61', keys: ['ControlLeft', 'KeyJ'], action: 'Jetway (attach/detach)' },
+                { id: 'uuid-62', keys: ['ControlLeft', 'KeyP'], action: 'Toggle Autopilot Pitch Hold' },
+                { id: 'uuid-63', keys: ['ControlLeft', 'KeyE'], action: 'Toggle Auto-Start Engine' },
+                { id: 'uuid-64', keys: ['ControlLeft', 'Digit3'], action: 'Toggle Autopilot Master' },
+                { id: 'uuid-65', keys: ['ControlLeft', 'AltLeft', 'Digit3'], action: 'Save Custom Camera 3' },
+                { id: 'uuid-66', keys: ['ControlLeft', 'AltLeft', 'Digit1'], action: 'Save Custom Camera 1' },
+                { id: 'uuid-67', keys: ['ControlLeft', 'AltLeft', 'Digit2'], action: 'Save Custom Camera 2' },
+                { id: 'uuid-68', keys: ['ControlLeft', 'PageUp'], action: 'Increase Autopilot Reference Altitude' },
+                { id: 'uuid-69', keys: ['ControlLeft', 'PageDown'], action: 'Decrease Autopilot Reference Altitude' },
+                { id: 'uuid-70', keys: ['ControlLeft', 'KeyZ'], action: 'Toggle Autopilot Master' },
+                { id: 'uuid-71', keys: ['ControlLeft', 'Space'], action: 'Reset Cockpit View' },
+                { id: 'uuid-72', keys: ['AltLeft', 'KeyZ'], action: 'Autopilot On' },
+                { id: 'uuid-73', keys: ['AltLeft', 'KeyI'], action: 'Toggle Master Ignition Switch' },
+                { id: 'uuid-74', keys: ['AltLeft', 'KeyS'], action: 'Toggle Alternate Static' },
+                { id: 'uuid-75', keys: ['AltLeft', 'KeyF'], action: 'Toggle Flashlight' },
+                { id: 'uuid-76', keys: ['AltLeft', 'KeyB'], action: 'Select Airspeed Bug' },
+                { id: 'uuid-77', keys: ['AltLeft', 'Digit3'], action: 'Load Custom Camera 3' },
+            ];
+
+            let keybindsData = [...defaultKeybindsData];
+
+            const keys = document.querySelectorAll('.key');
+            const keybindDisplay = document.getElementById('keybind-display');
+            let pressedKeys = new Set();
+            let selectedKeys = new Set();
+            let activeTimeout = null;
+            let recordingKeys = new Set();
+            let isRecording = false;
+            let nextId = defaultKeybindsData.length + 1;
+
+            const formatKeys = (keyCodes) => {
+                return keyCodes.map(code => {
+                    const element = document.querySelector(`[data-key="${code}"]`);
+                    return element ? element.textContent.trim() : code;
+                }).join(' + ');
+            };
+
+            const updateDisplay = () => {
+                const combinedKeys = new Set([...pressedKeys, ...selectedKeys]);
+                
+                keybindDisplay.innerHTML = '';
+                
+                if (combinedKeys.size === 0) {
+                    keybindDisplay.innerHTML = `
+                        <div class="text-white text-lg font-bold mb-2">Instructions:</div>
+                        <ul class="text-sm">
+                            <li>Press keys on your physical keyboard.</li>
+                            <li>Click keys on the virtual keyboard.</li>
+                            <li>Selected keys will highlight and show all matching commands below.</li>
+                        </ul>
+                    `;
+                }
+
+                const actions = keybindsData.filter(item => {
+                    return [...combinedKeys].every(key => item.keys.includes(key));
+                }).sort((a, b) => a.keys.length - b.keys.length); // Sort by number of keys for better display
+
+                if (actions.length > 0) {
+                    const ul = document.createElement('ul');
+                    actions.forEach(item => {
+                        const li = document.createElement('li');
+                        li.setAttribute('data-id', item.id);
+                        li.innerHTML = `
+                            <span>${formatKeys(item.keys)}: ${item.action}</span>
+                            <span class="remove-button">&times;</span>
+                        `;
+                        ul.appendChild(li);
+                    });
+                    keybindDisplay.appendChild(ul);
+                } else if (combinedKeys.size > 0) {
+                     keybindDisplay.textContent = `No commands found for the selected keys.`;
+                }
+                
+                const createButton = document.createElement('button');
+                createButton.id = 'create-keybind-btn';
+                createButton.className = 'create-button';
+                createButton.textContent = 'Create Your Own Keybind...';
+                keybindDisplay.appendChild(createButton);
+                
+                document.getElementById('create-keybind-btn').onclick = () => {
+                    document.getElementById('createModal').classList.remove('hidden');
+                };
+            };
+            
+            // Handle physical keyboard input
+            document.addEventListener('keydown', (e) => {
+                if (isRecording) {
+                    return;
+                }
+                const keyElement = document.querySelector(`[data-key="${e.code}"]`);
+                if (keyElement) {
+                    if (!e.repeat) {
+                        keyElement.classList.add('key-pressed');
+                    }
+                    pressedKeys.add(e.code);
+                    if (activeTimeout) {
+                        clearTimeout(activeTimeout);
+                    }
+                    updateDisplay();
+                }
+            });
+
+            document.addEventListener('keyup', (e) => {
+                if (isRecording) {
+                    return;
+                }
+                const keyElement = document.querySelector(`[data-key="${e.code}"]`);
+                if (keyElement) {
+                    keyElement.classList.remove('key-pressed');
+                    pressedKeys.delete(e.code);
+                    
+                    activeTimeout = setTimeout(() => {
+                        updateDisplay();
+                    }, 100);
+                }
+            });
+
+            // Handle mouse clicks on the virtual keyboard
+            keys.forEach(key => {
+                key.addEventListener('click', (e) => {
+                    const keyElement = e.currentTarget;
+                    const keyCode = keyElement.dataset.key;
+                    
+                    if (keyCode === 'ResetDefaults') {
+                        keybindsData = [...defaultKeybindsData];
+                        selectedKeys.clear();
+                        pressedKeys.clear();
+                        keys.forEach(k => k.classList.remove('key-selected', 'key-pressed'));
+                        updateDisplay();
+                        return;
+                    }
+
+                    if (selectedKeys.has(keyCode)) {
+                        selectedKeys.delete(keyCode);
+                        keyElement.classList.remove('key-selected');
+                    } else {
+                        selectedKeys.add(keyCode);
+                        keyElement.classList.add('key-selected');
+                    }
+                    
+                    updateDisplay();
+                });
+            });
+
+            // Modal functionality
+            const modal = document.getElementById('createModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const saveKeybindBtn = document.getElementById('saveKeybindBtn');
+            const recordKeybindBtn = document.getElementById('recordKeybindBtn');
+            const clearRecordingBtn = document.getElementById('clearRecordingBtn');
+            const stopRecordingBtn = document.getElementById('stopRecordingBtn');
+            const keyCombinationDisplay = document.getElementById('keyCombinationDisplay');
+            const keyActionInput = document.getElementById('keyAction');
+            
+            const handleRecordingKeyDown = (e) => {
+                if (e.target === keyActionInput) return;
+                e.preventDefault();
+                const isModifier = ['ShiftLeft', 'ShiftRight', 'ControlLeft', 'ControlRight', 'AltLeft', 'AltRight', 'MetaLeft', 'MetaRight'].includes(e.code);
+                if (e.code === 'Escape' || e.code === 'Enter') {
+                    e.preventDefault();
+                    return;
+                }
+                if (!e.repeat && !recordingKeys.has(e.code)) {
+                    recordingKeys.add(e.code);
+                    keyCombinationDisplay.textContent = formatKeys([...recordingKeys].sort());
+                }
+            };
+            
+            const handleRecordingKeyUp = (e) => {
+                const keyElement = document.querySelector(`[data-key="${e.code}"]`);
+                if (keyElement) {
+                    keyElement.classList.remove('key-pressed');
+                }
+            }
+
+            const stopRecording = () => {
+                isRecording = false;
+                recordKeybindBtn.classList.remove('disabled-button');
+                clearRecordingBtn.classList.add('disabled-button');
+                stopRecordingBtn.classList.add('disabled-button');
+                document.removeEventListener('keydown', handleRecordingKeyDown);
+                document.removeEventListener('keyup', handleRecordingKeyUp);
+                keyCombinationDisplay.setAttribute('data-keybind-combo', JSON.stringify([...recordingKeys].sort()));
+            };
+            
+            recordKeybindBtn.onclick = () => {
+                isRecording = true;
+                recordingKeys.clear();
+                keyCombinationDisplay.textContent = 'Recording...';
+                recordKeybindBtn.classList.add('disabled-button');
+                clearRecordingBtn.classList.remove('disabled-button');
+                stopRecordingBtn.classList.remove('disabled-button');
+                document.addEventListener('keydown', handleRecordingKeyDown);
+                document.addEventListener('keyup', handleRecordingKeyUp);
+            };
+
+            clearRecordingBtn.onclick = () => {
+                if(isRecording) {
+                    recordingKeys.clear();
+                    keyCombinationDisplay.textContent = 'Recording...';
+                    keyCombinationDisplay.setAttribute('data-keybind-combo', '[]');
+                }
+            };
+            
+            stopRecordingBtn.onclick = () => {
+                stopRecording();
+            };
+
+            closeModalBtn.onclick = () => {
+                modal.classList.add('hidden');
+                recordingKeys.clear();
+                keyCombinationDisplay.textContent = 'Press the "Record Keybind" button below to start...';
+                keyCombinationDisplay.setAttribute('data-keybind-combo', '');
+                keyActionInput.value = '';
+                stopRecording();
+            };
+
+            saveKeybindBtn.onclick = () => {
+                const newKeys = JSON.parse(keyCombinationDisplay.getAttribute('data-keybind-combo'));
+                const newAction = keyActionInput.value;
+                if (newKeys && newKeys.length > 0 && newAction) {
+                    keybindsData.push({ id: `custom-${nextId++}`, keys: newKeys, action: newAction });
+                    updateDisplay();
+                    closeModalBtn.click();
+                } else {
+                    alert("Please provide both a key combination and an action description.");
+                }
+            };
+            
+            window.onclick = (event) => {
+                if (event.target == modal) {
+                    closeModalBtn.click();
+                }
+            };
+
+            // Event delegation for remove buttons
+            keybindDisplay.addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-button')) {
+                    const li = e.target.closest('li');
+                    const idToRemove = li.getAttribute('data-id');
+                    keybindsData = keybindsData.filter(item => item.id !== idToRemove);
+                    updateDisplay();
+                }
+            });
+
+            updateDisplay(); // Initial display setup
+        });
+    </script>
+</body>
+</html>
