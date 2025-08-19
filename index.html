@@ -223,7 +223,8 @@
 </head>
 <body class="bg-[#1a1a2e]">
     <div class="keyboard-container">
-        <!-- Top row: Function Keys & Special Keys -->
+        <h1 class="text-3xl font-bold text-center text-white">2024 MSFS Keybinds</h1>
+        <p class="text-center text-sm mb-6 text-gray-400">created by TrashCatFPV</p>
         <div class="keyboard-row">
             <div class="key" id="reset-button" data-key="ResetDefaults">Reset to Defaults</div>
             <div class="key" data-key="Escape">Esc</div>
@@ -243,7 +244,6 @@
             <div class="key" data-key="Delete">Del</div>
         </div>
 
-        <!-- Number row -->
         <div class="keyboard-row">
             <div class="key" data-key="Backquote">`</div>
             <div class="key" data-key="Digit1">1</div>
@@ -261,7 +261,6 @@
             <div class="key key-large" data-key="Backspace">Backspace</div>
         </div>
 
-        <!-- QWERTY row -->
         <div class="keyboard-row">
             <div class="key key-large" data-key="Tab">Tab</div>
             <div class="key" data-key="KeyQ">Q</div>
@@ -279,7 +278,6 @@
             <div class="key key-large" data-key="Backslash">\</div>
         </div>
 
-        <!-- ASDF row -->
         <div class="keyboard-row">
             <div class="key key-large" data-key="CapsLock">Caps</div>
             <div class="key" data-key="KeyA">A</div>
@@ -296,7 +294,6 @@
             <div class="key key-large" data-key="Enter">Enter</div>
         </div>
 
-        <!-- ZXC row -->
         <div class="keyboard-row">
             <div class="key key-large" data-key="ShiftLeft">Shift</div>
             <div class="key" data-key="KeyZ">Z</div>
@@ -312,7 +309,6 @@
             <div class="key key-large" data-key="ShiftRight">Shift</div>
         </div>
 
-        <!-- Bottom row -->
         <div class="keyboard-row">
             <div class="key key-large" data-key="ControlLeft">Ctrl</div>
             <div class="key" data-key="MetaLeft">Win</div>
@@ -327,7 +323,10 @@
             <div class="key" data-key="ArrowRight">→</div>
         </div>
 
-        <!-- Keybind display area -->
+        <div class="mt-4">
+            <input type="text" id="search-input" placeholder="Search for a function..." class="modal-text-input">
+        </div>
+
         <div id="keybind-display" class="bg-[#2e304f] text-green-300">
             <div class="text-white text-lg font-bold mb-2">Instructions:</div>
             <ul class="text-sm">
@@ -338,7 +337,6 @@
             <button id="create-keybind-btn" class="create-button">Create Your Own Keybind...</button>
         </div>
 
-        <!-- Modal for create your own -->
         <div id="createModal" class="modal hidden">
             <div class="modal-content">
                 <span class="close-button" id="closeModalBtn">&times;</span>
@@ -450,6 +448,7 @@
 
             const keys = document.querySelectorAll('.key');
             const keybindDisplay = document.getElementById('keybind-display');
+            const searchInput = document.getElementById('search-input');
             let pressedKeys = new Set();
             let selectedKeys = new Set();
             let activeTimeout = null;
@@ -464,29 +463,20 @@
                 }).join(' + ');
             };
 
-            const updateDisplay = () => {
+            const updateDisplay = (filterText = '') => {
                 const combinedKeys = new Set([...pressedKeys, ...selectedKeys]);
                 
                 keybindDisplay.innerHTML = '';
                 
-                if (combinedKeys.size === 0) {
-                    keybindDisplay.innerHTML = `
-                        <div class="text-white text-lg font-bold mb-2">Instructions:</div>
-                        <ul class="text-sm">
-                            <li>Press keys on your physical keyboard.</li>
-                            <li>Click keys on the virtual keyboard.</li>
-                            <li>Selected keys will highlight and show all matching commands below.</li>
-                        </ul>
-                    `;
-                }
-
-                const actions = keybindsData.filter(item => {
-                    return [...combinedKeys].every(key => item.keys.includes(key));
+                const filteredActions = keybindsData.filter(item => {
+                    const matchesSearch = item.action.toLowerCase().includes(filterText.toLowerCase());
+                    const matchesKeys = combinedKeys.size === 0 || [...combinedKeys].every(key => item.keys.includes(key));
+                    return matchesSearch && matchesKeys;
                 }).sort((a, b) => a.keys.length - b.keys.length); // Sort by number of keys for better display
-
-                if (actions.length > 0) {
+                
+                if (filteredActions.length > 0) {
                     const ul = document.createElement('ul');
-                    actions.forEach(item => {
+                    filteredActions.forEach(item => {
                         const li = document.createElement('li');
                         li.setAttribute('data-id', item.id);
                         li.innerHTML = `
@@ -496,8 +486,17 @@
                         ul.appendChild(li);
                     });
                     keybindDisplay.appendChild(ul);
-                } else if (combinedKeys.size > 0) {
-                     keybindDisplay.textContent = `No commands found for the selected keys.`;
+                } else if (combinedKeys.size > 0 || filterText.length > 0) {
+                     keybindDisplay.textContent = `No commands found for the selected keys or search term.`;
+                } else {
+                    keybindDisplay.innerHTML = `
+                        <div class="text-white text-lg font-bold mb-2">Instructions:</div>
+                        <ul class="text-sm">
+                            <li>Press keys on your physical keyboard.</li>
+                            <li>Click keys on the virtual keyboard.</li>
+                            <li>Selected keys will highlight and show all matching commands below.</li>
+                        </ul>
+                    `;
                 }
                 
                 const createButton = document.createElement('button');
@@ -525,7 +524,7 @@
                     if (activeTimeout) {
                         clearTimeout(activeTimeout);
                     }
-                    updateDisplay();
+                    updateDisplay(searchInput.value);
                 }
             });
 
@@ -539,7 +538,7 @@
                     pressedKeys.delete(e.code);
                     
                     activeTimeout = setTimeout(() => {
-                        updateDisplay();
+                        updateDisplay(searchInput.value);
                     }, 100);
                 }
             });
@@ -555,6 +554,7 @@
                         selectedKeys.clear();
                         pressedKeys.clear();
                         keys.forEach(k => k.classList.remove('key-selected', 'key-pressed'));
+                        searchInput.value = '';
                         updateDisplay();
                         return;
                     }
@@ -567,8 +567,15 @@
                         keyElement.classList.add('key-selected');
                     }
                     
-                    updateDisplay();
+                    updateDisplay(searchInput.value);
                 });
+            });
+            
+            // Handle search input
+            searchInput.addEventListener('input', (e) => {
+                selectedKeys.clear();
+                keys.forEach(k => k.classList.remove('key-selected'));
+                updateDisplay(e.target.value);
             });
 
             // Modal functionality
@@ -652,11 +659,32 @@
                     updateDisplay();
                     closeModalBtn.click();
                 } else {
-                    alert("Please provide both a key combination and an action description.");
+                     // Using a modal instead of alert()
+                     const message = "Please provide both a key combination and an action description.";
+                     const modalDiv = document.createElement('div');
+                     modalDiv.className = 'modal';
+                     modalDiv.innerHTML = `
+                         <div class="modal-content">
+                             <span class="close-button">&times;</span>
+                             <p>${message}</p>
+                         </div>
+                     `;
+                     document.body.appendChild(modalDiv);
+                     
+                     const closeBtn = modalDiv.querySelector('.close-button');
+                     closeBtn.onclick = () => {
+                         modalDiv.remove();
+                     };
+                     window.onclick = (event) => {
+                        if (event.target == modalDiv) {
+                            modalDiv.remove();
+                        }
+                     };
                 }
             };
             
             window.onclick = (event) => {
+                const modal = document.getElementById('createModal');
                 if (event.target == modal) {
                     closeModalBtn.click();
                 }
