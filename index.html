@@ -51,16 +51,14 @@
         .key-space {
             min-width: 300px;
         }
-        /* Style for keys that are currently pressed (physical keyboard) */
         .key-pressed {
             transform: scale(0.95);
-            background-color: #fca5a5; /* Tailwind red-500 */
+            background-color: #fca5a5;
             color: #1a1a2e;
             box-shadow: 0 0 10px rgba(252, 165, 165, 0.7);
         }
-        /* Style for keys that are selected (via click) */
         .key-selected {
-            background-color: #60a5fa; /* Tailwind blue-400 */
+            background-color: #60a5fa;
             color: #1a1a2e;
             box-shadow: 0 0 10px rgba(96, 165, 250, 0.7);
             transform: scale(0.95);
@@ -79,6 +77,7 @@
             gap: 0.5rem;
             align-items: center;
             justify-content: center;
+            transition: opacity 0.2s ease-in-out;
         }
         #keybind-display ul {
             list-style: none;
@@ -99,6 +98,9 @@
             justify-content: space-between;
             align-items: center;
         }
+        #keybind-display.display-inactive {
+            opacity: 0.4;
+        }
         .create-button {
             background-color: #4a5568;
             color: #e2e8f0;
@@ -113,7 +115,7 @@
             background-color: #2d3748;
         }
         .remove-button {
-            color: #ef4444; /* Tailwind red-500 */
+            color: #ef4444;
             font-weight: bold;
             cursor: pointer;
             font-size: 1.25rem;
@@ -122,9 +124,8 @@
             transition: color 0.2s;
         }
         .remove-button:hover {
-            color: #dc2626; /* Tailwind red-700 */
+            color: #dc2626;
         }
-        /* Modal styles */
         .modal {
             position: fixed;
             z-index: 100;
@@ -173,6 +174,7 @@
             border: 1px solid #4a5568;
             border-radius: 0.25rem;
             color: #e2e8f0;
+            transition: all 0.2s;
         }
         .modal-buttons {
             display: flex;
@@ -192,7 +194,7 @@
             background-color: #65a30d;
         }
         .modal-record-button {
-            background-color: #f59e0b; /* Tailwind amber-500 */
+            background-color: #f59e0b;
             color: #1a1a2e;
             padding: 0.5rem 1rem;
             border-radius: 0.5rem;
@@ -200,7 +202,7 @@
             transition: background-color 0.2s;
         }
         .modal-record-button:hover {
-            background-color: #d97706; /* Tailwind amber-700 */
+            background-color: #d97706;
         }
         .modal-text-input {
             width: 100%;
@@ -219,122 +221,156 @@
         .disabled-button:hover {
             background-color: #4a5568;
         }
+        .key-combo-conflict {
+            color: #f87171;
+            border-color: #ef4444;
+        }
+        .conflict-warning {
+            color: #fca5a5;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        #search-dropdown {
+            position: absolute;
+            width: 100%;
+            max-height: 240px;
+            overflow-y: auto;
+            background-color: #2d3748;
+            border: 1px solid #4a5568;
+            border-top: none;
+            border-radius: 0 0 0.5rem 0.5rem;
+            z-index: 50;
+        }
+        #search-dropdown li {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            color: #e2e8f0;
+        }
+        #search-dropdown li:hover {
+            background-color: #4a5568;
+        }
     </style>
 </head>
 <body class="bg-[#1a1a2e]">
     <div class="keyboard-container">
         <h1 class="text-3xl font-bold text-center text-white">2024 MSFS Keybinds</h1>
         <p class="text-center text-sm mb-6 text-gray-400">created by TrashCatFPV</p>
-        <div class="keyboard-row">
-            <div class="key" id="reset-button" data-key="ResetDefaults">Reset to Defaults</div>
-            <div class="key" data-key="Escape">Esc</div>
-            <div class="key" data-key="F1">F1</div>
-            <div class="key" data-key="F2">F2</div>
-            <div class="key" data-key="F3">F3</div>
-            <div class="key" data-key="F4">F4</div>
-            <div class="key" data-key="F5">F5</div>
-            <div class="key" data-key="F6">F6</div>
-            <div class="key" data-key="F7">F7</div>
-            <div class="key" data-key="F8">F8</div>
-            <div class="key" data-key="F9">F9</div>
-            <div class="key" data-key="F10">F10</div>
-            <div class="key" data-key="F11">F11</div>
-            <div class="key" data-key="F12">F12</div>
-            <div class="key">PrtSc</div>
-            <div class="key" data-key="Delete">Del</div>
+
+        <div class="bg-[#2e304f] p-4 rounded-lg mb-6 border border-[#3e405d]">
+            <h2 class="text-xl font-bold text-center text-white mb-3">How to Use This App 📋</h2>
+            <ul class="list-disc list-inside space-y-2 text-gray-300">
+                <li><strong>View Keybinds:</strong> Click a virtual key or press a physical key to see its functions.</li>
+                <li><strong>Search Commands:</strong> Use the search bar to find functions by name. Click it while empty to see all options.</li>
+                <li><strong>Create Custom Keybinds:</strong> Click the "Create Your Own Keybind..." button to add your own commands. Your custom keybinds are saved automatically!</li>
+                <li><strong>Remove Keybinds:</strong> Click the <span class="text-red-500 font-bold text-lg">&times;</span> next to a command to delete it.</li>
+                <li><strong>Reset All:</strong> Click the "Reset to Defaults" button to remove all custom keybinds.</li>
+            </ul>
         </div>
 
-        <div class="keyboard-row">
-            <div class="key" data-key="Backquote">`</div>
-            <div class="key" data-key="Digit1">1</div>
-            <div class="key" data-key="Digit2">2</div>
-            <div class="key" data-key="Digit3">3</div>
-            <div class="key" data-key="Digit4">4</div>
-            <div class="key" data-key="Digit5">5</div>
-            <div class="key" data-key="Digit6">6</div>
-            <div class="key" data-key="Digit7">7</div>
-            <div class="key" data-key="Digit8">8</div>
-            <div class="key" data-key="Digit9">9</div>
-            <div class="key" data-key="Digit0">0</div>
-            <div class="key" data-key="Minus">-</div>
-            <div class="key" data-key="Equal">=</div>
-            <div class="key key-large" data-key="Backspace">Backspace</div>
+        <div id="keyboard-layout">
+            <div class="keyboard-row">
+                <div class="key" id="reset-button" data-key="ResetDefaults">Reset to Defaults</div>
+                <div class="key" data-key="Escape">Esc</div>
+                <div class="key" data-key="F1">F1</div>
+                <div class="key" data-key="F2">F2</div>
+                <div class="key" data-key="F3">F3</div>
+                <div class="key" data-key="F4">F4</div>
+                <div class="key" data-key="F5">F5</div>
+                <div class="key" data-key="F6">F6</div>
+                <div class="key" data-key="F7">F7</div>
+                <div class="key" data-key="F8">F8</div>
+                <div class="key" data-key="F9">F9</div>
+                <div class="key" data-key="F10">F10</div>
+                <div class="key" data-key="F11">F11</div>
+                <div class="key" data-key="F12">F12</div>
+                <div class="key">PrtSc</div>
+                <div class="key" data-key="Delete">Del</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="key" data-key="Backquote">`</div>
+                <div class="key" data-key="Digit1">1</div>
+                <div class="key" data-key="Digit2">2</div>
+                <div class="key" data-key="Digit3">3</div>
+                <div class="key" data-key="Digit4">4</div>
+                <div class="key" data-key="Digit5">5</div>
+                <div class="key" data-key="Digit6">6</div>
+                <div class="key" data-key="Digit7">7</div>
+                <div class="key" data-key="Digit8">8</div>
+                <div class="key" data-key="Digit9">9</div>
+                <div class="key" data-key="Digit0">0</div>
+                <div class="key" data-key="Minus">-</div>
+                <div class="key" data-key="Equal">=</div>
+                <div class="key key-large" data-key="Backspace">Backspace</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="key key-large" data-key="Tab">Tab</div>
+                <div class="key" data-key="KeyQ">Q</div>
+                <div class="key" data-key="KeyW">W</div>
+                <div class="key" data-key="KeyE">E</div>
+                <div class="key" data-key="KeyR">R</div>
+                <div class="key" data-key="KeyT">T</div>
+                <div class="key" data-key="KeyY">Y</div>
+                <div class="key" data-key="KeyU">U</div>
+                <div class="key" data-key="KeyI">I</div>
+                <div class="key" data-key="KeyO">O</div>
+                <div class="key" data-key="KeyP">P</div>
+                <div class="key" data-key="BracketLeft">[</div>
+                <div class="key" data-key="BracketRight">]</div>
+                <div class="key key-large" data-key="Backslash">\</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="key key-large" data-key="CapsLock">Caps</div>
+                <div class="key" data-key="KeyA">A</div>
+                <div class="key" data-key="KeyS">S</div>
+                <div class="key" data-key="KeyD">D</div>
+                <div class="key" data-key="KeyF">F</div>
+                <div class="key" data-key="KeyG">G</div>
+                <div class="key" data-key="KeyH">H</div>
+                <div class="key" data-key="KeyJ">J</div>
+                <div class="key" data-key="KeyK">K</div>
+                <div class="key" data-key="KeyL">L</div>
+                <div class="key" data-key="Semicolon">;</div>
+                <div class="key" data-key="Quote">'</div>
+                <div class="key key-large" data-key="Enter">Enter</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="key key-large" data-key="ShiftLeft">Shift</div>
+                <div class="key" data-key="KeyZ">Z</div>
+                <div class="key" data-key="KeyX">X</div>
+                <div class="key" data-key="KeyC">C</div>
+                <div class="key" data-key="KeyV">V</div>
+                <div class="key" data-key="KeyB">B</div>
+                <div class="key" data-key="KeyN">N</div>
+                <div class="key" data-key="KeyM">M</div>
+                <div class="key" data-key="Comma">,</div>
+                <div class="key" data-key="Period">.</div>
+                <div class="key" data-key="Slash">/</div>
+                <div class="key key-large" data-key="ShiftRight">Shift</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="key key-large" data-key="ControlLeft">Ctrl</div>
+                <div class="key" data-key="MetaLeft">Win</div>
+                <div class="key key-large" data-key="AltLeft">Alt</div>
+                <div class="key key-space" data-key="Space">Space</div>
+                <div class="key key-large" data-key="AltRight">Alt</div>
+                <div class="key" data-key="MetaRight">Win</div>
+                <div class="key key-large" data-key="ControlRight">Ctrl</div>
+                <div class="key" data-key="ArrowUp">↑</div>
+                <div class="key" data-key="ArrowLeft">←</div>
+                <div class="key" data-key="ArrowDown">↓</div>
+                <div class="key" data-key="ArrowRight">→</div>
+            </div>
         </div>
 
-        <div class="keyboard-row">
-            <div class="key key-large" data-key="Tab">Tab</div>
-            <div class="key" data-key="KeyQ">Q</div>
-            <div class="key" data-key="KeyW">W</div>
-            <div class="key" data-key="KeyE">E</div>
-            <div class="key" data-key="KeyR">R</div>
-            <div class="key" data-key="KeyT">T</div>
-            <div class="key" data-key="KeyY">Y</div>
-            <div class="key" data-key="KeyU">U</div>
-            <div class="key" data-key="KeyI">I</div>
-            <div class="key" data-key="KeyO">O</div>
-            <div class="key" data-key="KeyP">P</div>
-            <div class="key" data-key="BracketLeft">[</div>
-            <div class="key" data-key="BracketRight">]</div>
-            <div class="key key-large" data-key="Backslash">\</div>
-        </div>
-
-        <div class="keyboard-row">
-            <div class="key key-large" data-key="CapsLock">Caps</div>
-            <div class="key" data-key="KeyA">A</div>
-            <div class="key" data-key="KeyS">S</div>
-            <div class="key" data-key="KeyD">D</div>
-            <div class="key" data-key="KeyF">F</div>
-            <div class="key" data-key="KeyG">G</div>
-            <div class="key" data-key="KeyH">H</div>
-            <div class="key" data-key="KeyJ">J</div>
-            <div class="key" data-key="KeyK">K</div>
-            <div class="key" data-key="KeyL">L</div>
-            <div class="key" data-key="Semicolon">;</div>
-            <div class="key" data-key="Quote">'</div>
-            <div class="key key-large" data-key="Enter">Enter</div>
-        </div>
-
-        <div class="keyboard-row">
-            <div class="key key-large" data-key="ShiftLeft">Shift</div>
-            <div class="key" data-key="KeyZ">Z</div>
-            <div class="key" data-key="KeyX">X</div>
-            <div class="key" data-key="KeyC">C</div>
-            <div class="key" data-key="KeyV">V</div>
-            <div class="key" data-key="KeyB">B</div>
-            <div class="key" data-key="KeyN">N</div>
-            <div class="key" data-key="KeyM">M</div>
-            <div class="key" data-key="Comma">,</div>
-            <div class="key" data-key="Period">.</div>
-            <div class="key" data-key="Slash">/</div>
-            <div class="key key-large" data-key="ShiftRight">Shift</div>
-        </div>
-
-        <div class="keyboard-row">
-            <div class="key key-large" data-key="ControlLeft">Ctrl</div>
-            <div class="key" data-key="MetaLeft">Win</div>
-            <div class="key key-large" data-key="AltLeft">Alt</div>
-            <div class="key key-space" data-key="Space">Space</div>
-            <div class="key key-large" data-key="AltRight">Alt</div>
-            <div class="key" data-key="MetaRight">Win</div>
-            <div class="key key-large" data-key="ControlRight">Ctrl</div>
-            <div class="key" data-key="ArrowUp">↑</div>
-            <div class="key" data-key="ArrowLeft">←</div>
-            <div class="key" data-key="ArrowDown">↓</div>
-            <div class="key" data-key="ArrowRight">→</div>
-        </div>
-
-        <div class="mt-4">
-            <input type="text" id="search-input" placeholder="Search for a function..." class="modal-text-input">
+        <div id="search-container" class="mt-4 relative">
+            <input type="text" id="search-input" placeholder="Search for a function..." class="modal-text-input" autocomplete="off">
+            <div id="search-dropdown" class="hidden">
+                <ul id="search-results-list"></ul>
+            </div>
         </div>
 
         <div id="keybind-display" class="bg-[#2e304f] text-green-300">
-            <div class="text-white text-lg font-bold mb-2">Instructions:</div>
-            <ul class="text-sm">
-                <li>Press keys on your physical keyboard.</li>
-                <li>Click keys on the virtual keyboard.</li>
-                <li>Selected keys will highlight and show all matching commands below.</li>
-            </ul>
-            <button id="create-keybind-btn" class="create-button">Create Your Own Keybind...</button>
+            <!-- Content will be dynamically inserted here by JavaScript -->
         </div>
 
         <div id="createModal" class="modal hidden">
@@ -346,10 +382,11 @@
                 <input type="text" id="keyAction" class="modal-text-input" placeholder="e.g., Toggle cockpit lights">
 
                 <label for="keyCombination" class="block mt-4 mb-2">Key Combination:</label>
-                <div id="keyCombinationDisplay" class="modal-input mb-4" data-keybind-combo="">
+                <div id="keyCombinationDisplay" class="modal-input mb-2" data-keybind-combo="">
                     Press the "Record Keybind" button below to start...
                 </div>
-                <div class="flex gap-2">
+                <!-- Conflict warning will be inserted here by JS -->
+                <div class="flex gap-2 mt-4">
                     <button id="recordKeybindBtn" class="modal-record-button">Record Keybind</button>
                     <button id="clearRecordingBtn" class="create-button disabled-button">Clear</button>
                     <button id="stopRecordingBtn" class="create-button disabled-button">Stop Recording</button>
@@ -365,6 +402,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const defaultKeybindsData = [
+                // Default keybind data remains the same...
                 { id: 'uuid-1', keys: ['Escape'], action: 'Pause' },
                 { id: 'uuid-2', keys: ['F1'], action: 'Mixture Cut / Throttle Cut' },
                 { id: 'uuid-3', keys: ['F2'], action: 'Decrease Throttle' },
@@ -444,59 +482,50 @@
                 { id: 'uuid-77', keys: ['AltLeft', 'Digit3'], action: 'Load Custom Camera 3' },
             ];
 
-            let keybindsData = [...defaultKeybindsData];
+            // --- App State & Core Functions ---
+            const saveKeybinds = () => localStorage.setItem('msfsKeybinds', JSON.stringify(keybindsData));
+            const loadKeybinds = () => JSON.parse(localStorage.getItem('msfsKeybinds')) || [...defaultKeybindsData];
+            let keybindsData = loadKeybinds();
+            const formatKeys = (keyCodes) => keyCodes.map(code => (document.querySelector(`[data-key="${code}"]`)?.textContent.trim() || code)).join(' + ');
 
-            const keys = document.querySelectorAll('.key');
+            // --- Element References ---
+            const keyboardLayout = document.getElementById('keyboard-layout');
             const keybindDisplay = document.getElementById('keybind-display');
             const searchInput = document.getElementById('search-input');
+            const searchContainer = document.getElementById('search-container');
+            const searchDropdown = document.getElementById('search-dropdown');
+            const searchResultsList = document.getElementById('search-results-list');
+            const modal = document.getElementById('createModal');
+
+            // --- State Management ---
             let pressedKeys = new Set();
             let selectedKeys = new Set();
             let activeTimeout = null;
             let recordingKeys = new Set();
             let isRecording = false;
-            let nextId = defaultKeybindsData.length + 1;
+            let nextId = keybindsData.reduce((maxId, item) => item.id.startsWith('custom-') ? Math.max(maxId, parseInt(item.id.split('-')[1], 10) + 1) : maxId, 1);
 
-            const formatKeys = (keyCodes) => {
-                return keyCodes.map(code => {
-                    const element = document.querySelector(`[data-key="${code}"]`);
-                    return element ? element.textContent.trim() : code;
-                }).join(' + ');
-            };
-
+            // --- Display & UI Functions ---
             const updateDisplay = (filterText = '') => {
                 const combinedKeys = new Set([...pressedKeys, ...selectedKeys]);
-                
                 keybindDisplay.innerHTML = '';
-                
+
                 const filteredActions = keybindsData.filter(item => {
-                    const matchesSearch = item.action.toLowerCase().includes(filterText.toLowerCase());
-                    const matchesKeys = combinedKeys.size === 0 || [...combinedKeys].every(key => item.keys.includes(key));
-                    return matchesSearch && matchesKeys;
-                }).sort((a, b) => a.keys.length - b.keys.length); // Sort by number of keys for better display
-                
+                    if (combinedKeys.size > 0) return [...combinedKeys].every(key => item.keys.includes(key));
+                    return item.action.toLowerCase().includes(filterText.toLowerCase());
+                }).sort((a, b) => a.keys.length - b.keys.length);
+
                 if (filteredActions.length > 0) {
                     const ul = document.createElement('ul');
                     filteredActions.forEach(item => {
                         const li = document.createElement('li');
                         li.setAttribute('data-id', item.id);
-                        li.innerHTML = `
-                            <span>${formatKeys(item.keys)}: ${item.action}</span>
-                            <span class="remove-button">&times;</span>
-                        `;
+                        li.innerHTML = `<span>${formatKeys(item.keys)}: ${item.action}</span><span class="remove-button">&times;</span>`;
                         ul.appendChild(li);
                     });
                     keybindDisplay.appendChild(ul);
-                } else if (combinedKeys.size > 0 || filterText.length > 0) {
-                     keybindDisplay.textContent = `No commands found for the selected keys or search term.`;
                 } else {
-                    keybindDisplay.innerHTML = `
-                        <div class="text-white text-lg font-bold mb-2">Instructions:</div>
-                        <ul class="text-sm">
-                            <li>Press keys on your physical keyboard.</li>
-                            <li>Click keys on the virtual keyboard.</li>
-                            <li>Selected keys will highlight and show all matching commands below.</li>
-                        </ul>
-                    `;
+                    keybindDisplay.innerHTML = `<p class="text-gray-400">${combinedKeys.size > 0 || filterText ? 'No commands found.' : 'Select a key or search to begin.'}</p>`;
                 }
                 
                 const createButton = document.createElement('button');
@@ -504,82 +533,97 @@
                 createButton.className = 'create-button';
                 createButton.textContent = 'Create Your Own Keybind...';
                 keybindDisplay.appendChild(createButton);
-                
-                document.getElementById('create-keybind-btn').onclick = () => {
-                    document.getElementById('createModal').classList.remove('hidden');
-                };
+                createButton.onclick = () => modal.classList.remove('hidden');
+            };
+
+            const showSearchDropdown = (filter = '') => {
+                searchResultsList.innerHTML = '';
+                const uniqueActions = [...new Set(keybindsData.map(item => item.action))];
+                const filteredActions = uniqueActions.filter(action => action.toLowerCase().includes(filter.toLowerCase()));
+
+                if (filteredActions.length > 0) {
+                    filteredActions.forEach(action => {
+                        const li = document.createElement('li');
+                        li.textContent = action;
+                        li.addEventListener('mousedown', () => {
+                            updateDisplay(action);
+                            searchInput.value = '';
+                            hideSearchDropdown();
+                        });
+                        searchResultsList.appendChild(li);
+                    });
+                    searchDropdown.classList.remove('hidden');
+                    keybindDisplay.classList.add('display-inactive');
+                } else {
+                    hideSearchDropdown();
+                }
             };
             
-            // Handle physical keyboard input
+            const hideSearchDropdown = () => {
+                searchDropdown.classList.add('hidden');
+                keybindDisplay.classList.remove('display-inactive');
+            };
+
+            // --- Event Listeners ---
+            searchInput.addEventListener('focus', () => showSearchDropdown(searchInput.value));
+            searchInput.addEventListener('input', () => {
+                const searchTerm = searchInput.value;
+                showSearchDropdown(searchTerm);
+                if (!searchTerm) updateDisplay('');
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!searchContainer.contains(e.target)) hideSearchDropdown();
+            });
+
             document.addEventListener('keydown', (e) => {
-                if (isRecording) {
-                    return;
-                }
+                if (document.activeElement === searchInput || isRecording) return;
                 const keyElement = document.querySelector(`[data-key="${e.code}"]`);
                 if (keyElement) {
-                    if (!e.repeat) {
-                        keyElement.classList.add('key-pressed');
-                    }
+                    searchInput.value = '';
+                    hideSearchDropdown();
+                    if (!e.repeat) keyElement.classList.add('key-pressed');
                     pressedKeys.add(e.code);
-                    if (activeTimeout) {
-                        clearTimeout(activeTimeout);
-                    }
-                    updateDisplay(searchInput.value);
+                    clearTimeout(activeTimeout);
+                    updateDisplay();
                 }
             });
 
             document.addEventListener('keyup', (e) => {
-                if (isRecording) {
-                    return;
-                }
+                if (isRecording) return;
                 const keyElement = document.querySelector(`[data-key="${e.code}"]`);
                 if (keyElement) {
                     keyElement.classList.remove('key-pressed');
                     pressedKeys.delete(e.code);
-                    
-                    activeTimeout = setTimeout(() => {
-                        updateDisplay(searchInput.value);
-                    }, 100);
+                    activeTimeout = setTimeout(() => updateDisplay(), 100);
                 }
             });
 
-            // Handle mouse clicks on the virtual keyboard
-            keys.forEach(key => {
-                key.addEventListener('click', (e) => {
-                    const keyElement = e.currentTarget;
-                    const keyCode = keyElement.dataset.key;
-                    
-                    if (keyCode === 'ResetDefaults') {
-                        keybindsData = [...defaultKeybindsData];
-                        selectedKeys.clear();
-                        pressedKeys.clear();
-                        keys.forEach(k => k.classList.remove('key-selected', 'key-pressed'));
-                        searchInput.value = '';
-                        updateDisplay();
-                        return;
-                    }
+            // REFACTORED: Event delegation for virtual keyboard
+            keyboardLayout.addEventListener('click', (e) => {
+                const keyElement = e.target.closest('.key');
+                if (!keyElement) return;
 
-                    if (selectedKeys.has(keyCode)) {
-                        selectedKeys.delete(keyCode);
-                        keyElement.classList.remove('key-selected');
-                    } else {
-                        selectedKeys.add(keyCode);
-                        keyElement.classList.add('key-selected');
-                    }
-                    
-                    updateDisplay(searchInput.value);
-                });
-            });
-            
-            // Handle search input
-            searchInput.addEventListener('input', (e) => {
-                selectedKeys.clear();
-                keys.forEach(k => k.classList.remove('key-selected'));
-                updateDisplay(e.target.value);
+                searchInput.value = '';
+                hideSearchDropdown();
+                const keyCode = keyElement.dataset.key;
+
+                if (keyCode === 'ResetDefaults') {
+                    keybindsData = [...defaultKeybindsData];
+                    saveKeybinds();
+                    selectedKeys.clear();
+                    pressedKeys.clear();
+                    document.querySelectorAll('.key').forEach(k => k.classList.remove('key-selected', 'key-pressed'));
+                    updateDisplay();
+                    return;
+                }
+                
+                keyElement.classList.toggle('key-selected');
+                selectedKeys.has(keyCode) ? selectedKeys.delete(keyCode) : selectedKeys.add(keyCode);
+                updateDisplay();
             });
 
-            // Modal functionality
-            const modal = document.getElementById('createModal');
+            // --- Modal Logic ---
             const closeModalBtn = document.getElementById('closeModalBtn');
             const saveKeybindBtn = document.getElementById('saveKeybindBtn');
             const recordKeybindBtn = document.getElementById('recordKeybindBtn');
@@ -587,36 +631,41 @@
             const stopRecordingBtn = document.getElementById('stopRecordingBtn');
             const keyCombinationDisplay = document.getElementById('keyCombinationDisplay');
             const keyActionInput = document.getElementById('keyAction');
-            
+
+            const checkForConflicts = (keysToCheck) => {
+                const sortedKeys = [...keysToCheck].sort();
+                return keybindsData.find(bind => 
+                    bind.keys.length === sortedKeys.length && 
+                    [...bind.keys].sort().every((val, i) => val === sortedKeys[i])
+                )?.action || null;
+            };
+
             const handleRecordingKeyDown = (e) => {
-                if (e.target === keyActionInput) return;
-                e.preventDefault();
-                const isModifier = ['ShiftLeft', 'ShiftRight', 'ControlLeft', 'ControlRight', 'AltLeft', 'AltRight', 'MetaLeft', 'MetaRight'].includes(e.code);
-                if (e.code === 'Escape' || e.code === 'Enter') {
-                    e.preventDefault();
-                    return;
-                }
-                if (!e.repeat && !recordingKeys.has(e.code)) {
-                    recordingKeys.add(e.code);
-                    keyCombinationDisplay.textContent = formatKeys([...recordingKeys].sort());
-                }
+                if (e.target === keyActionInput || e.code === 'Escape' || e.code === 'Enter') return e.preventDefault();
+                if (!e.repeat) recordingKeys.add(e.code);
+                keyCombinationDisplay.textContent = formatKeys([...recordingKeys].sort());
             };
             
-            const handleRecordingKeyUp = (e) => {
-                const keyElement = document.querySelector(`[data-key="${e.code}"]`);
-                if (keyElement) {
-                    keyElement.classList.remove('key-pressed');
-                }
-            }
-
             const stopRecording = () => {
                 isRecording = false;
                 recordKeybindBtn.classList.remove('disabled-button');
                 clearRecordingBtn.classList.add('disabled-button');
                 stopRecordingBtn.classList.add('disabled-button');
                 document.removeEventListener('keydown', handleRecordingKeyDown);
-                document.removeEventListener('keyup', handleRecordingKeyUp);
                 keyCombinationDisplay.setAttribute('data-keybind-combo', JSON.stringify([...recordingKeys].sort()));
+
+                const conflictAction = checkForConflicts([...recordingKeys]);
+                modal.querySelector('.conflict-warning')?.remove();
+
+                if (conflictAction && recordingKeys.size > 0) {
+                    keyCombinationDisplay.classList.add('key-combo-conflict');
+                    const warningEl = document.createElement('div');
+                    warningEl.className = 'conflict-warning';
+                    warningEl.textContent = `⚠️ Warning: This is already used for "${conflictAction}".`;
+                    keyCombinationDisplay.after(warningEl);
+                } else {
+                    keyCombinationDisplay.classList.remove('key-combo-conflict');
+                }
             };
             
             recordKeybindBtn.onclick = () => {
@@ -627,7 +676,8 @@
                 clearRecordingBtn.classList.remove('disabled-button');
                 stopRecordingBtn.classList.remove('disabled-button');
                 document.addEventListener('keydown', handleRecordingKeyDown);
-                document.addEventListener('keyup', handleRecordingKeyUp);
+                keyCombinationDisplay.classList.remove('key-combo-conflict');
+                modal.querySelector('.conflict-warning')?.remove();
             };
 
             clearRecordingBtn.onclick = () => {
@@ -635,72 +685,59 @@
                     recordingKeys.clear();
                     keyCombinationDisplay.textContent = 'Recording...';
                     keyCombinationDisplay.setAttribute('data-keybind-combo', '[]');
+                    keyCombinationDisplay.classList.remove('key-combo-conflict');
+                    modal.querySelector('.conflict-warning')?.remove();
                 }
             };
             
-            stopRecordingBtn.onclick = () => {
-                stopRecording();
-            };
+            stopRecordingBtn.onclick = stopRecording;
 
-            closeModalBtn.onclick = () => {
+            const resetModal = () => {
                 modal.classList.add('hidden');
+                if(isRecording) stopRecording();
                 recordingKeys.clear();
                 keyCombinationDisplay.textContent = 'Press the "Record Keybind" button below to start...';
                 keyCombinationDisplay.setAttribute('data-keybind-combo', '');
                 keyActionInput.value = '';
-                stopRecording();
+                keyCombinationDisplay.classList.remove('key-combo-conflict');
+                modal.querySelector('.conflict-warning')?.remove();
             };
 
+            closeModalBtn.onclick = resetModal;
+
             saveKeybindBtn.onclick = () => {
-                const newKeys = JSON.parse(keyCombinationDisplay.getAttribute('data-keybind-combo'));
-                const newAction = keyActionInput.value;
-                if (newKeys && newKeys.length > 0 && newAction) {
+                const comboAttr = keyCombinationDisplay.getAttribute('data-keybind-combo');
+                const newKeys = comboAttr ? JSON.parse(comboAttr) : [];
+                const newAction = keyActionInput.value.trim();
+
+                if (newKeys.length > 0 && newAction) {
                     keybindsData.push({ id: `custom-${nextId++}`, keys: newKeys, action: newAction });
+                    saveKeybinds();
                     updateDisplay();
-                    closeModalBtn.click();
+                    resetModal();
                 } else {
-                     // Using a modal instead of alert()
                      const message = "Please provide both a key combination and an action description.";
                      const modalDiv = document.createElement('div');
                      modalDiv.className = 'modal';
-                     modalDiv.innerHTML = `
-                         <div class="modal-content">
-                             <span class="close-button">&times;</span>
-                             <p>${message}</p>
-                         </div>
-                     `;
+                     modalDiv.innerHTML = `<div class="modal-content" style="z-index: 101;"><span class="close-button">&times;</span><p>${message}</p></div>`;
                      document.body.appendChild(modalDiv);
-                     
-                     const closeBtn = modalDiv.querySelector('.close-button');
-                     closeBtn.onclick = () => {
-                         modalDiv.remove();
-                     };
-                     window.onclick = (event) => {
-                        if (event.target == modalDiv) {
-                            modalDiv.remove();
-                        }
-                     };
+                     modalDiv.querySelector('.close-button').onclick = () => modalDiv.remove();
                 }
             };
             
-            window.onclick = (event) => {
-                const modal = document.getElementById('createModal');
-                if (event.target == modal) {
-                    closeModalBtn.click();
-                }
-            };
+            window.onclick = (event) => { if (event.target == modal) resetModal(); };
 
-            // Event delegation for remove buttons
             keybindDisplay.addEventListener('click', (e) => {
                 if (e.target.classList.contains('remove-button')) {
-                    const li = e.target.closest('li');
-                    const idToRemove = li.getAttribute('data-id');
+                    const idToRemove = e.target.closest('li').getAttribute('data-id');
                     keybindsData = keybindsData.filter(item => item.id !== idToRemove);
-                    updateDisplay();
+                    saveKeybinds();
+                    updateDisplay(searchInput.value);
                 }
             });
 
-            updateDisplay(); // Initial display setup
+            // --- Initial Load ---
+            updateDisplay();
         });
     </script>
 </body>
