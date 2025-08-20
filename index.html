@@ -11,6 +11,22 @@
             font-family: 'Inter', sans-serif;
             background-color: #1a1a2e;
             color: #e0e0e0;
+            /* New background styles */
+            background-image: url('http://googleusercontent.com/file_content/1');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        /* New overlay style */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(26, 26, 46, 0.85); /* Semi-transparent dark overlay */
+            z-index: -1;
         }
         .keyboard-container {
             display: flex;
@@ -251,7 +267,7 @@
         }
     </style>
 </head>
-<body class="bg-[#1a1a2e]">
+<body>
     <div class="keyboard-container">
         <h1 class="text-3xl font-bold text-center text-white">2024 MSFS Keybinds</h1>
         <p class="text-center text-sm mb-6 text-gray-400">created by TrashCatFPV</p>
@@ -599,7 +615,6 @@
                 }
             });
 
-            // REFACTORED: Event delegation for virtual keyboard
             keyboardLayout.addEventListener('click', (e) => {
                 const keyElement = e.target.closest('.key');
                 if (!keyElement) return;
